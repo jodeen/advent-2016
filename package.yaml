@@ -28,6 +28,7 @@ dependencies:
 - text
 - mtl
 - vector
+- pureMD5
 
 library:
   source-dirs: src

@@ -21,19 +21,29 @@ runDay = R.runDay inputParser partA partB
 
 ------------ PARSER ------------
 inputParser :: Parser Input
-inputParser = error "Not implemented yet!"
+inputParser = (many1' letter) `sepBy1'` endOfLine
 
 ------------ TYPES ------------
-type Input = Void
+type Input = [String]
 
-type OutputA = Void
+type OutputA = String
 
-type OutputB = Void
+type OutputB = String
 
 ------------ PART A ------------
+mostFrequent :: String -> Char
+mostFrequent s =  snd (maximum (map (\c -> (length c, head c)) (group (sort s))))
+
 partA :: Input -> OutputA
-partA = error "Not implemented yet!"
+partA input = map mostFrequent frequency
+    where
+        frequency = transpose input
 
 ------------ PART B ------------
+leastFrequent :: String -> Char
+leastFrequent s =  snd (minimum (map (\c -> (length c, head c)) (group (sort s))))
+
 partB :: Input -> OutputB
-partB = error "Not implemented yet!"
+partB input = map leastFrequent frequency
+    where
+        frequency = transpose input

@@ -12,8 +12,11 @@ import qualified Data.Vector as Vec
 import qualified Util.Util as U
 
 import qualified Program.RunDay as R (runDay, Day)
-import Data.Attoparsec.Text
+import Data.Attoparsec.Text hiding (take)
 import Data.Void
+import Control.Applicative.Combinators (between)
+import Control.Applicative ((<|>))
+import Data.Either (partitionEithers)
 {- ORMOLU_ENABLE -}
 
 runDay :: R.Day
@@ -21,19 +24,44 @@ runDay = R.runDay inputParser partA partB
 
 ------------ PARSER ------------
 inputParser :: Parser Input
-inputParser = error "Not implemented yet!"
+inputParser = parseLine `sepBy1'` endOfLine
+
+parseLine = many1' (Left <$> many1' letter <|> between (char '[') (char ']') (Right <$> many1' letter))
 
 ------------ TYPES ------------
-type Input = Void
+type Input = [[Either String String]]
 
-type OutputA = Void
+type OutputA = Int
 
-type OutputB = Void
+type OutputB = Int
 
 ------------ PART A ------------
+window :: Int -> String -> [String]
+window num l = filter (\s -> length s == num) (map (take num) (tails l))
+
+containsPair :: String -> Bool
+containsPair item = any (\s -> s == reverse s && (head s) /= (s !! 1)) (window 4 item)
+
+isAbba :: [Either String String] -> Bool
+isAbba sections = (not (any containsPair hnet)) && (any containsPair bare)
+    where
+        (bare, hnet) = partitionEithers sections
+
 partA :: Input -> OutputA
-partA = error "Not implemented yet!"
+partA input = length (filter isAbba input)
 
 ------------ PART B ------------
+find3 :: String -> [(Char,Char)]
+find3 string = mapMaybe isAba (window 3 string)
+    where
+        isAba [a,b,c] = if (a == c && b /= a) then Just (a,b) else Nothing
+
+isSsl :: [Either String String] -> Bool
+isSsl sections = isJust (find (\(a,b) -> [b,a,b] `elem` babCandidates) abaCandidates)
+    where
+        (bare, hnet) = partitionEithers sections
+        abaCandidates = concatMap find3 (concatMap (window 3) bare)
+        babCandidates = concatMap (window 3) hnet
+
 partB :: Input -> OutputB
-partB = error "Not implemented yet!"
+partB input = length (filter isSsl input)
